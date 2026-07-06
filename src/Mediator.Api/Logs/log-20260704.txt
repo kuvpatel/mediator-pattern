@@ -1,0 +1,12 @@
+2026-07-04 10:43:54.278 +01:00 [INF] Starting Customer API
+2026-07-04 10:44:19.298 +01:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-07-04 10:44:19.329 +01:00 [INF] Handling GetCustomerQuery {"CustomerId":1,"$type":"GetCustomerQuery"}
+2026-07-04 10:44:20.536 +01:00 [INF] Handled GetCustomerQuery in 1201 ms
+2026-07-04 10:51:38.138 +01:00 [INF] Starting Customer API
+2026-07-04 10:52:06.887 +01:00 [WRN] You do not have a valid license key for the Lucky Penny software MediatR. This is allowed for development and testing scenarios. If you are running in production you are required to have a licensed version. Please visit https://luckypennysoftware.com to obtain a valid license.
+2026-07-04 10:52:06.926 +01:00 [INF] Handling CreateCustomerCommand {"Customer":{"Id":0,"FirstName":"test1","LastName":"test123","Email":"test123tts@example.com","$type":"CustomerRequest"},"$type":"CreateCustomerCommand"}
+2026-07-04 10:52:07.867 +01:00 [INF] Created customer 107
+2026-07-04 10:52:07.869 +01:00 [INF] Handled CreateCustomerCommand in 933 ms
+2026-07-04 11:05:12.988 +01:00 [INF] Starting Customer API
+2026-07-04 11:05:25.757 +01:00 [INF] Handling GetCustomerQuery {"CustomerId":2,"$type":"GetCustomerQuery"}
+2026-07-04 11:05:26.752 +01:00 [INF] Handled GetCustomerQuery in 987 ms

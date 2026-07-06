@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/Mediator.Api/Mediator.Api.csproj" />
+  <Project Path="src/Mediator.Application/Mediator.Application.csproj" />
+  <Project Path="src/Mediator.Domain/Mediator.Domain.csproj" Id="3783417b-b828-4960-8dcd-5e9ea919eb11" />
+  <Project Path="src/Mediator.Infrastructure/Mediator.Infrastructure.csproj" Id="040d347d-f7d8-485c-a961-b216a055e04b" />
+  <Project Path="tests/Mediator.Integration.Tests/Mediator.IntegrationTests.csproj" Id="6b5a4a86-0e76-4cc4-abd4-48f6dbd57231" />
+</Solution>

@@ -1,0 +1,43 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Test Results
+TestResults/
+
+# NuGet
+*.nupkg
+packages/
+
+# Logs
+*.log
+
+# Publish output
+publish/
+
+# Azure
+*.PublishSettings
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+coverage.xml
+
+# Local settings
+appsettings.Development.json

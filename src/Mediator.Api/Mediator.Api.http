@@ -1,0 +1,6 @@
+@MediateRApi_HostAddress = http://localhost:5083
+
+GET {{MediateRApi_HostAddress}}/customer/
+Accept: application/json
+
+###
