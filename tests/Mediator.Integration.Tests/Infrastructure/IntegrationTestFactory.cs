@@ -1,10 +1,6 @@
-﻿using Mediator.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace Mediator.IntegrationTests.Infrastructure
@@ -32,22 +28,6 @@ namespace Mediator.IntegrationTests.Infrastructure
                 });
             });
         }
-
-        //protected override IHost CreateHost(IHostBuilder builder)
-        //{
-        //    // 1. Build host
-        //    var host = base.CreateHost(builder);
-
-        //    // 2. Create scope AFTER DI is fully ready
-        //    using var scope = host.Services.CreateScope();
-
-        //    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        //    // THIS is the critical fix
-        //    db.Database.Migrate();
-
-
-        //    return host;
-        //}
+        
     }
 }

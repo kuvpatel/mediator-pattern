@@ -4,20 +4,21 @@
 
 This project uses a modern ASP.NET Core integration testing approach to verify the complete request pipeline, from the HTTP endpoint through MediatR, Entity Framework Core, SQL Server, and back to the HTTP response.
 
-The integration tests execute against a real SQL Server instance running inside a Docker container using Testcontainers.
+The integration tests execute against a real SQL Server instance running inside a Docker container using Testcontainers. The tests exercise the complete application stack without mocking repositories or the database.
 
 ---
 
 # Technology Stack
 
 * .NET 9
-* xUnit
+* ASP.NET Core Web API
 * Entity Framework Core
-* SQL Server
-* Testcontainers
+* SQL Server 2022
+* MediatR
+* xUnit
 * FluentAssertions
+* Testcontainers
 * ASP.NET Core WebApplicationFactory
-* Respawn (database reset)
 
 ---
 
@@ -54,7 +55,34 @@ Entity Framework Core
 SQL Server Testcontainer
 ```
 
-The tests exercise the complete application stack instead of mocking dependencies.
+---
+
+# API Endpoints
+
+| Method | Endpoint             | Description                  |
+| ------ | -------------------- | ---------------------------- |
+| GET    | `/api/customer`      | Returns all customers        |
+| GET    | `/api/customer/{id}` | Returns a customer by Id     |
+| POST   | `/api/customer`      | Creates a new customer       |
+| PUT    | `/api/customer/{id}` | Updates an existing customer |
+| DELETE | `/api/customer/{id}` | Deletes a customer           |
+
+---
+
+# Database
+
+The integration tests execute against a SQL Server database hosted inside a Docker container.
+
+## Customers Table
+
+| Column    | Type                        |
+| --------- | --------------------------- |
+| Id        | int (Identity, Primary Key) |
+| FirstName | nvarchar(50)                |
+| LastName  | nvarchar(50)                |
+| Email     | nvarchar(100)               |
+
+Entity Framework Core migrations are automatically applied before the tests execute.
 
 ---
 
@@ -63,8 +91,8 @@ The tests exercise the complete application stack instead of mocking dependencie
 ```
 Mediator.Api.IntegrationTests
 │
-├── CustomerController
-│   ├── GetCustomerTests.cs
+├── Customers
+│   ├── GetCustomersTests.cs
 │   ├── GetCustomerByIdTests.cs
 │   ├── CreateCustomerTests.cs
 │   ├── UpdateCustomerTests.cs
@@ -90,12 +118,9 @@ Responsible for:
 
 * Starting the SQL Server Docker container
 * Creating the ASP.NET Core test host
-* Applying EF Core migrations
-* Initializing Respawn
-* Resetting the database between tests
-* Disposing of the container and host
-
-This fixture is shared across all integration test classes.
+* Applying Entity Framework Core migrations
+* Sharing the SQL Server container across all integration tests
+* Disposing of the container and test host
 
 ---
 
@@ -105,30 +130,30 @@ Derived from `WebApplicationFactory<Program>`.
 
 Responsibilities:
 
-* Starts the API in the **Testing** environment.
-* Overrides the database connection string.
-* Uses the SQL Server Testcontainer database.
+* Starts the API using the **Testing** environment.
+* Overrides the application's connection string.
+* Connects the API to the SQL Server Testcontainer.
 
 The factory does **not**:
 
 * Apply migrations
 * Seed data
-* Reset the database
 
-These responsibilities belong to `SqlServerFixture`.
+These responsibilities belong to `SqlServerFixture` and `DatabaseSeeder`.
 
 ---
 
 ## IntegrationTestBase
 
-Provides common functionality for all integration tests.
+Provides common functionality for integration tests.
 
 Current helper methods include:
 
-* `ClearDatabaseAsync()`
 * `SeedCustomerAsync()`
+* `SeedCustomersAsync(int count)`
+* `ClearDatabaseAsync()`
 
-This removes repetitive code from each test class.
+This removes repetitive setup code from the test classes.
 
 ---
 
@@ -136,54 +161,31 @@ This removes repetitive code from each test class.
 
 Provides reusable methods for creating test data.
 
-Example:
+Examples:
 
 ```csharp
 var customer = await SeedCustomerAsync();
+
+var customers = await SeedCustomersAsync(5);
 ```
 
-Returning the created entity avoids hard-coded identity values in tests.
-
----
-
-## Respawn
-
-Respawn is used to quickly reset the database after each test.
-
-Advantages:
-
-* Faster than deleting records manually
-* Handles related tables automatically
-* Preserves the `__EFMigrationsHistory` table
-* Keeps every test isolated
+Returning the created entities avoids hard-coded identity values within tests.
 
 ---
 
 # Entity Framework Core
 
-Database schema is managed using EF Core migrations.
+The database schema is managed using Entity Framework Core migrations.
 
-The fixture automatically executes:
+The test fixture automatically executes:
 
 ```csharp
 await db.Database.MigrateAsync();
 ```
 
-before any tests run.
+before any tests are run.
 
-No manual SQL scripts are required.
-
----
-
-# Database
-
-The integration tests use:
-
-* SQL Server 2022
-* Docker container
-* Dedicated test database (`SimpleCustomerDb`)
-
-The production or development database is never used during testing.
+This ensures the database schema always matches the application model.
 
 ---
 
@@ -213,6 +215,7 @@ Examples include:
 
 * 200 OK
 * 201 Created
+* 204 No Content
 * 400 Bad Request
 * 404 Not Found
 * 500 Internal Server Error
@@ -223,18 +226,47 @@ The global exception handler is exercised as part of the complete request pipeli
 
 # Current Integration Tests
 
-Implemented:
+## GET /api/customer
 
-* Get customer by ID (existing customer)
-* Get customer by ID (customer not found)
+* Returns all customers
+* Returns an empty collection when no customers exist
+* Returns the expected customer data
 
-Additional CRUD endpoint tests are planned.
+---
+
+## GET /api/customer/{id}
+
+* Returns a customer when the customer exists
+* Returns 404 when the customer does not exist
+
+---
+
+## POST /api/customer
+
+* Creates a customer successfully
+* Returns 400 when the request is invalid
+
+---
+
+## PUT /api/customer/{id}
+
+* Updates an existing customer
+* Returns 404 when the customer does not exist
+* Returns 400 when the request is invalid
+
+---
+
+## DELETE /api/customer/{id}
+
+* Deletes an existing customer
+* Returns 404 when the customer does not exist
+* Verifies the customer count decreases after deletion
 
 ---
 
 # Benefits of the Current Approach
 
-* Tests the complete ASP.NET Core pipeline
+* Tests the complete ASP.NET Core request pipeline
 * Uses a real SQL Server database
 * Uses Entity Framework Core exactly as production
 * Exercises MediatR handlers
@@ -250,24 +282,20 @@ Additional CRUD endpoint tests are planned.
 
 ## Short Term
 
-* Complete CRUD endpoint integration tests
-* Validate ProblemDetails responses
-* Test validation failures
-* Test duplicate resource scenarios
-* Test pagination and filtering endpoints
+* Validate `ProblemDetails` response bodies
+* Test duplicate customer scenarios
+* Test validation edge cases
 
 ## Medium Term
 
-* Add test data builders
-* Add reusable response assertion helpers
-* Add GitHub Actions CI pipeline
-* Measure code coverage
+* Introduce Test Data Builders
+* Add reusable assertion helpers
+* Configure GitHub Actions or Azure DevOps CI
+* Generate code coverage reports
 
 ## Long Term
 
-* True parallel integration testing using isolated databases
-* Deterministic database naming
-* Faster CI execution
+* Parallel integration testing with isolated databases
 * Performance and load testing
 
 ---
@@ -280,7 +308,7 @@ Run all tests:
 dotnet test
 ```
 
-Run a single test project:
+Run the integration test project:
 
 ```bash
 dotnet test Mediator.Api.IntegrationTests
@@ -298,20 +326,20 @@ dotnet test --collect:"XPlat Code Coverage"
 
 * .NET 9 SDK
 * Docker Desktop running
-* SQL Server Docker image available (pulled automatically if required)
+* SQL Server Docker image available (downloaded automatically if required)
 
 ---
 
 # Notes
 
-The integration test suite is intentionally isolated from the development environment.
+The integration test suite is isolated from the development environment.
 
 Each test run:
 
-1. Starts a SQL Server container.
+1. Starts a SQL Server Docker container.
 2. Creates the ASP.NET Core test host.
-3. Applies EF Core migrations.
-4. Resets the database between tests using Respawn.
-5. Executes tests against the full HTTP pipeline.
+3. Applies Entity Framework Core migrations.
+4. Seeds the database as required by each test.
+5. Executes requests through the complete HTTP pipeline.
 
-This provides a reliable, repeatable, and production-like testing environment.
+This provides a reliable, repeatable, production-like testing environment while ensuring the application behaves correctly from the HTTP endpoint through to the database.

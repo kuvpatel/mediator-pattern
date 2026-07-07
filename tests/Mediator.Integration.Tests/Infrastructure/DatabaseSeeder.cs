@@ -1,6 +1,5 @@
 ﻿using Mediator.Infrastructure.Repositories;
 using Mediator.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace Mediator.IntegrationTests.Infrastructure
 {
@@ -29,30 +28,21 @@ namespace Mediator.IntegrationTests.Infrastructure
             return customer;
         }
 
-        public static async Task<List<Customer>> SeedCustomersAsync(AppDbContext context)
+        public static async Task<List<Customer>> SeedCustomersAsync(AppDbContext context, int count)
         {
-            var customers = new List<Customer>
-            {
-                new Customer
-                {
-                    FirstName = "John",
-                    LastName = "Smith",
-                    Email = "john@test.com",
-                },
-                new Customer
-                {
-                    FirstName = "Jane",
-                    LastName = "Doe",
-                    Email = "jane@test.com",
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(count);
 
-                },
-                new Customer
+            var customers = new List<Customer>();
+
+            for (int i = 1; i <= count; i++)
+            {
+                customers.Add(new Customer
                 {
-                    FirstName = "Bob",
-                    LastName = "Johnson",
-                    Email = "bob@test.com",
-                }
-            };
+                    FirstName = $"First{i}",
+                    LastName = $"Last{i}",
+                    Email = $"customer{i}@test.com"
+                });
+            }
 
             context.Customers.AddRange(customers);
 

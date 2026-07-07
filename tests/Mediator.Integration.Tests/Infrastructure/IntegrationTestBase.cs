@@ -1,10 +1,8 @@
 ﻿using Mediator.Domain.Entities;
 using Mediator.Infrastructure.Repositories;
-using Mediator.IntegrationTests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
-namespace Mediator.IntegrationTests
+namespace Mediator.IntegrationTests.Infrastructure
 {
     public abstract class IntegrationTestBase
     {
@@ -22,22 +20,13 @@ namespace Mediator.IntegrationTests
             Services = fixture.Factory.Services;
         }
 
-        //protected async Task ResetDatabaseAsync()
-        //{
-        //    using var scope = Services.CreateScope();
-
-        //    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        //    await _fixture.Respawner.ResetAsync(db);
-        //}
-
-        protected async Task<List<Customer>> SeedCustomersAsync()
+        protected async Task<List<Customer>> SeedCustomersAsync(int count)
         {
             using var scope = Services.CreateScope();
 
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            return await DatabaseSeeder.SeedCustomersAsync(db);
+            return await DatabaseSeeder.SeedCustomersAsync(db, count);
         }
 
         protected async Task<Customer> SeedCustomerAsync()

@@ -1,11 +1,10 @@
 ﻿using Mediator.Infrastructure.Repositories;
-using Microsoft.Extensions.DependencyInjection;
-using Respawn;
 using System.Data.Common;
-using Testcontainers.MsSql;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using DotNet.Testcontainers.Containers;
+using Testcontainers.MsSql;
+using Respawn;
+
 
 namespace Mediator.IntegrationTests.Infrastructure
 {
@@ -20,8 +19,6 @@ namespace Mediator.IntegrationTests.Infrastructure
         public Respawner _respawner = null;
 
         public IntegrationTestFactory Factory { get; private set; } = null!;
-
-       // public string ConnectionString => _container.GetConnectionString().Replace("Database=master", "Database=SimpleCustomerDb");
 
 
         public async Task InitializeAsync()
