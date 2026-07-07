@@ -278,6 +278,102 @@ The global exception handler is exercised as part of the complete request pipeli
 
 ---
 
+# Testing Design Decisions
+
+The integration testing framework was designed to closely mirror the application's production environment while remaining fast, reliable, and maintainable.
+
+## Why Testcontainers?
+
+A SQL Server instance is hosted inside a Docker container for the integration tests.
+
+This approach provides several benefits:
+
+* Tests execute against a real SQL Server instance rather than an in-memory database.
+* Every developer and CI pipeline uses the same database environment.
+* No local SQL Server installation is required.
+* Test environments are isolated from development and production databases.
+
+---
+
+## Why Entity Framework Core Migrations?
+
+The test database schema is created using Entity Framework Core migrations.
+
+Benefits include:
+
+* The database schema always matches the application model.
+* No manual SQL scripts need to be maintained.
+* Database changes are version controlled alongside the application code.
+* New developers can build the database automatically when running the tests.
+
+---
+
+## Why WebApplicationFactory?
+
+`WebApplicationFactory<Program>` hosts the ASP.NET Core application in memory during testing.
+
+This allows the tests to execute the complete HTTP request pipeline, including:
+
+* Routing
+* Model binding
+* Request validation
+* Dependency Injection
+* Middleware
+* Exception handling
+* Controller actions
+
+The tests interact with the API in the same way as a client application.
+
+---
+
+## Why Integration Tests Instead of Mocking?
+
+The objective of these tests is to validate that all application components work together correctly.
+
+Each test exercises:
+
+* HTTP endpoints
+* Controllers
+* MediatR request handlers
+* Repository implementations
+* Entity Framework Core
+* SQL Server
+
+By avoiding mocked repositories and databases, the tests provide greater confidence that the application behaves correctly in a production-like environment.
+
+---
+
+## Test Data Management
+
+Test data is created using a shared `DatabaseSeeder` utility.
+
+This approach provides:
+
+* Reusable seed methods across all test classes.
+* Predictable and consistent test data.
+* Reduced duplication within the test suite.
+* Easier maintenance as new test scenarios are added.
+
+The seeder supports creating both individual customers and a configurable number of customers, allowing each test to create only the data it requires.
+
+---
+
+## Test Structure
+
+All integration tests follow the **Arrange / Act / Assert** pattern.
+
+Common functionality is shared through `IntegrationTestBase`, reducing duplication and ensuring consistency across the test suite.
+
+Each test is responsible for:
+
+1. Preparing the required test data.
+2. Executing an HTTP request against the API.
+3. Verifying both the HTTP response and, where appropriate, the resulting database state.
+
+This structure makes the tests easy to read, maintain, and extend as the application evolves.
+
+---
+
 # Future Improvements
 
 ## Short Term
